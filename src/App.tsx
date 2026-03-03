@@ -1789,11 +1789,10 @@ if (selectedProjectId === id) {
                   className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-indigo-200 transition-all"
                 >
                   Cập nhật
-                </button>
+                               </button>
               </div>
             </form>
           </div>
         </div>
-    </div>
-  );
-}
+      </div>
+    )}
