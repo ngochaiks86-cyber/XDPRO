@@ -214,8 +214,7 @@ export default function App() {
       if (res.ok) {
         setShowAddProject(false);
         setNewProject({ name: '', budget: 0, start_date: format(new Date(), 'yyyy-MM-dd'), image_url: '' });
-        fetchProjects();
-      }
+              }
     } catch (err) {
       console.error('Failed to add project', err);
     }
@@ -232,8 +231,7 @@ export default function App() {
       });
       if (res.ok) {
         setShowEditProject(false);
-        fetchProjects();
-        if (selectedProjectId === editingProject.id) {
+              if (selectedProjectId === editingProject.id) {
           fetchProjectDetails(editingProject.id);
         }
       }
@@ -448,8 +446,7 @@ export default function App() {
       const res = await fetch(`/api/projects/${id}`, { method: 'DELETE' });
       if (res.ok) {
         if (selectedProjectId === id) setSelectedProjectId(null);
-        fetchProjects();
-      }
+              }
     } catch (err) {
       console.error('Failed to delete project', err);
     }
