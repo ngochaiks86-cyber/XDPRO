@@ -1777,6 +1777,21 @@ if (selectedProjectId === id) {
                 </button>
               </div>
             </form>
+          <button 
+                  type="button"
+                  onClick={() => setShowEditOwnerPayment(false)}
+                  className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl transition-colors"
+                >
+                  Hủy
+                </button>
+                <button 
+                  type="submit"
+                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-indigo-200 transition-all"
+                >
+                  Cập nhật
+                </button>
+              </div>
+            </form>
           </div>
         </div>
     </div>
