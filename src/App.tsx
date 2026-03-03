@@ -346,24 +346,28 @@ export default function App() {
   });
 };
 
-  const handleUpdateExpense = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingExpense || !selectedProjectId) return;
-    try {
-      const res = await fetch(`/api/expenses/${editingExpense.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editingExpense),
-      });
-      if (res.ok) {
-        setShowEditExpense(false);
-        setEditingExpense(null);
-        fetchProjectDetails(selectedProjectId);
-      }
-    } catch (err) {
-      console.error('Failed to update expense', err);
-    }
-  };
+  const handleUpdateExpense = (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!editingExpense || !selectedProjectId) return;
+
+  setProjects(prev =>
+    prev.map(project =>
+      project.id === selectedProjectId
+        ? {
+            ...project,
+            expenses: project.expenses.map(exp =>
+              exp.id === editingExpense.id
+                ? editingExpense
+                : exp
+            ),
+          }
+        : project
+    )
+  );
+
+  setShowEditExpense(false);
+  setEditingExpense(null);
+};
 
   const handleAddExpensePayment = (e: React.FormEvent) => {
   e.preventDefault();
