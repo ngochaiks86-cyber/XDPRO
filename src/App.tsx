@@ -243,36 +243,7 @@ const updatedProjects = [...projects, newProjectWithId];
     image_url: ''
   });
 };
-projects.push(newProjectWithId);
-      saveProjects(projects);   // 👈 THÊM DÒNG NÀY Ở ĐÂY
-      setProjects(projects);   // ⚠ QUAN TRỌNG
 
-setShowAddProject(false);
-
-setNewProject({
-  name: "",
-  budget: 0,
-  start_date: format(new Date(), "yyyy-MM-dd"),
-  image_url: ""
-});
-  };
-
-  const handleEditProject = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingProject) return;
-    try {
-      const res = await fetch(`/api/projects/${editingProject.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editingProject),
-      });
-      if (res.ok) {
-        setShowEditProject(false);
-        fetchProjects();
-        if (selectedProjectId === editingProject.id) {
-          fetchProjectDetails(editingProject.id);
-        }
-      }
     } catch (err) {
       console.error('Failed to edit project', err);
     }
@@ -1227,8 +1198,7 @@ if (selectedProjectId === id) {
                             </table>
                           </div>
                         </div>
-                      );
-                    })}
+                                      })}
                   </div>
                 )}
               </>
@@ -1250,10 +1220,10 @@ if (selectedProjectId === id) {
 
 <NumericInput
   required
-  value={editingOwnerPayment.amount}
+  value={editingOwnerPayment?.amount}
   onChange={(val) =>
     setEditingOwnerPayment({
-      ...editingOwnerPayment,
+      ...editingOwnerPayment!,
       amount: val,
     })
   }
@@ -1281,21 +1251,22 @@ if (selectedProjectId === id) {
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
                 />
               </div>
-              <div className="flex gap-3 pt-4">
-                <button 
-                  type="button"
-                  onClick={() => setShowAddOwnerPayment(false)}
-                  className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl transition-colors"
-                >
-                  Hủy
-                </button>
-                <button 
-                  type="submit"
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-emerald-200 transition-all"
-                >
-                  Lưu thông tin
-                </button>
-              </div>
+             <div className="flex gap-3 pt-4">
+  <button 
+    type="button"
+    onClick={() => setShowAddOwnerPayment(false)}
+    className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl transition-colors"
+  >
+    Hủy
+  </button>
+
+  <button 
+    type="submit"
+    className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-indigo-200 transition-all"
+  >
+    Lưu thông tin
+  </button>
+</div>
             </form>
           </div>
         </div>
