@@ -1244,14 +1244,21 @@ if (selectedProjectId === id) {
             <h2 className="text-2xl font-black text-slate-900 mb-6">Ghi nhận chủ đầu tư ứng</h2>
             <form onSubmit={handleAddOwnerPayment} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Số tiền ứng (VNĐ)</label>
-                <NumericInput 
-                  required
-                  value={newOwnerPayment.amount}
-                  onChange={(val) => setNewOwnerPayment({...newOwnerPayment, amount: val})}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
-                  placeholder="0"
-                />
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">
+  Số tiền ứng (VNĐ)
+</label>
+
+<NumericInput
+  required
+  value={editingOwnerPayment.amount}
+  onChange={(val) =>
+    setEditingOwnerPayment({
+      ...editingOwnerPayment,
+      amount: val,
+    })
+  }
+  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+/>
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Nội dung / Ghi chú</label>
