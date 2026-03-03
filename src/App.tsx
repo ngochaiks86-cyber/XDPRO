@@ -1697,13 +1697,15 @@ if (selectedProjectId === id) {
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Số tiền (VND)</label>
-                <NumericInput 
-                  required
-                  value={editingExpense.amount}
-                  onChange={(val) => setEditingExpense({...editingExpense, amount: val})}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-                />
+               <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">
+    Số tiền (VND)
+  </label>
+  <NumericInput 
+    required
+    value={editingExpense.amount}
+    onChange={(val) => setEditingExpense({...editingExpense, amount: val})}
+    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+  />
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Ngày chi</label>
