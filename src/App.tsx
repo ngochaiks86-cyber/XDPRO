@@ -214,8 +214,13 @@ const saveProjects = (projects: any[]) => {
     e.preventDefault();
     try {
   const projects = getProjects();
-projects.push(newProject);
-saveProjects(projects);
+const newProjectWithId = {
+  ...newProject,
+  id: Date.now()
+};
+
+projects.push(newProjectWithId);
+      saveProjects(projects);   // 👈 THÊM DÒNG NÀY Ở ĐÂY
       setProjects(projects);   // ⚠ QUAN TRỌNG
 
 setShowAddProject(false);
@@ -455,11 +460,19 @@ setNewProject({
     e.stopPropagation();
     if (!confirm('Bạn có chắc chắn muốn xóa toàn bộ công trình này?')) return;
     try {
-      const res = await fetch(`/api/projects/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        if (selectedProjectId === id) setSelectedProjectId(null);
-        fetchProjects();
-      }
+     const projects = getProjects();
+
+const updatedProjects = projects.filter(
+  (project) => project.id !== id
+);
+
+saveProjects(updatedProjects);
+
+setProjects(updatedProjects);
+
+if (selectedProjectId === id) {
+  setSelectedProjectId(null);
+}
     } catch (err) {
       console.error('Failed to delete project', err);
     }
