@@ -1113,87 +1113,96 @@ if (selectedProjectId === id) {
                                 </tr>
                               </thead>
                               <tbody className="divide-y divide-slate-50">
-                                {filteredExpenses.length === 0 ? (
-                                  <tr>
-                                    <td colSpan={4} className="px-6 py-12 text-center text-slate-400 italic">
-                                      Chưa có chi phí nào trong hạng mục này
-                                    </td>
-                                  </tr>
-                                ) : (
-                                  filteredExpenses.map((expense) => (
-                                    <tr key={expense.id} className="hover:bg-slate-50 transition-colors group">
-                                      <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">{expense.date}</td>
-                                      <td className="px-6 py-4">
-                                        <div className="space-y-1">
-                                          <p className="text-sm text-slate-900 font-medium">{expense.description}</p>
-                                          {expense.payments && expense.payments.length > 0 && (
-                                            <div className="flex flex-wrap gap-1">
-                                              {expense.payments.map((p, idx) => (
-                                                <span key={p.id} className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded border border-slate-200 flex items-center gap-1">
-                                                  Ứng {idx + 1}: {formatCurrency(p.amount)}
-                                                  <button 
-                                                    onClick={() => handleDeleteExpensePayment(p.id)} 
-                                                    className="hover:text-red-500 ml-1 p-0.5 rounded-full hover:bg-red-50 transition-colors"
-                                                    title="Xóa đợt ứng"
-                                                  >
-                                                    <Plus size={10} className="rotate-45" />
-                                                  </button>
-                                                </span>
-                                              ))}
-                                            </div>
-                                          )}
-                                        </div>
-                                      </td>
-                                      <td className="px-6 py-4 text-sm text-slate-600 text-center whitespace-nowrap">
-                                        {expense.quantity ? `${expense.quantity} ${expense.unit || ''}` : '-'}
-                                      </td>
-                                      <td className="px-6 py-4 text-sm font-bold text-slate-900 text-right whitespace-nowrap">
-                                        <div className="flex flex-col items-end">
-                                          <span>{formatCurrency(expense.amount)}</span>
-                                          {expense.payments && expense.payments.length > 0 && (
-                                            <span className="text-[10px] text-slate-400">Đã ứng: {formatCurrency(expense.payments.reduce((s, p) => s + p.amount, 0))}</span>
-                                          )}
-                                        </div>
-                                      </td>
-                                      <td className="px-6 py-4 text-right">
-                                        <div className="flex items-center justify-end gap-2">
-                                          <button 
-                                            onClick={() => {
-                                              setSelectedExpenseId(expense.id);
-                                              setShowAddExpensePayment(true);
-                                            }}
-                                            className="text-indigo-600 hover:bg-indigo-50 p-1.5 rounded-lg transition-colors"
-                                            title="Ghi nhận ứng tiền"
-                                          >
-                                            <DollarSign size={16} />
-                                          </button>
-                                          <button 
-                                            onClick={() => {
-                                              setEditingExpense(expense);
-                                              setShowEditExpense(true);
-                                            }}
-                                            className="text-slate-400 hover:text-indigo-600 transition-colors p-1 hover:bg-indigo-50 rounded-md"
-                                            title="Sửa chi phí"
-                                          >
-                                            <Pencil size={16} />
-                                          </button>
-                                          <button 
-                                            onClick={() => handleDeleteExpense(expense.id)}
-                                            className="text-slate-400 hover:text-red-500 transition-colors p-1 hover:bg-red-50 rounded-md"
-                                            title="Xóa chi phí"
-                                          >
-                                            <Trash2 size={16} />
-                                          </button>
-                                        </div>
-                                      </td>
-                                    </tr>
-                                  ))
-                                )}
+                    {filteredExpenses.length === 0 ? (
+  <tr>
+    <td colSpan={5} className="px-6 py-12 text-center text-slate-400 italic">
+      Chưa có chi phí nào trong hạng mục này
+    </td>
+  </tr>
+) : (
+  filteredExpenses.map((expense) => (
+    <tr key={expense.id} className="hover:bg-slate-50 transition-colors group">
+      <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
+        {expense.date}
+      </td>
+
+      <td className="px-6 py-4">
+        <div className="space-y-1">
+          <p className="text-sm text-slate-900 font-medium">
+            {expense.description}
+          </p>
+
+          {expense.payments && expense.payments.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {expense.payments.map((p, idx) => (
+                <span
+                  key={p.id}
+                  className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded border border-slate-200 flex items-center gap-1"
+                >
+                  Ứng {idx + 1}: {formatCurrency(p.amount)}
+
+                  <button
+                    onClick={() => handleDeleteExpensePayment(p.id)}
+                    className="hover:text-red-500 ml-1 p-0.5 rounded-full hover:bg-red-50 transition-colors"
+                    title="Xóa đợt ứng"
+                  >
+                    <Plus size={10} className="rotate-45" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </td>
+
+      <td className="px-6 py-4 text-sm text-slate-600 text-center whitespace-nowrap">
+        {expense.quantity
+          ? `${expense.quantity} ${expense.unit || ""}`
+          : "-"}
+      </td>
+
+      <td className="px-6 py-4 text-sm font-bold text-slate-900 text-right whitespace-nowrap">
+        {formatCurrency(expense.amount)}
+      </td>
+
+      <td className="px-6 py-4 text-right">
+        <div className="flex items-center justify-end gap-2">
+          <button
+            onClick={() => {
+              setSelectedExpenseId(expense.id);
+              setShowAddExpensePayment(true);
+            }}
+            className="text-indigo-600 hover:bg-indigo-50 p-1.5 rounded-lg transition-colors"
+          >
+            <DollarSign size={16} />
+          </button>
+
+          <button
+            onClick={() => {
+              setEditingExpense(expense);
+              setShowEditExpense(true);
+            }}
+            className="text-slate-400 hover:text-indigo-600 transition-colors p-1 hover:bg-indigo-50 rounded-md"
+          >
+            <Pencil size={16} />
+          </button>
+
+          <button
+            onClick={() => handleDeleteExpense(expense.id)}
+            className="text-slate-400 hover:text-red-500 transition-colors p-1 hover:bg-red-50 rounded-md"
+          >
+            <Trash2 size={16} />
+          </button>
+        </div>
+      </td>
+    </tr>
+  ))
+)}
                               </tbody>
                             </table>
                           </div>
                         </div>
-                                      })}
+                                      ))}
                   </div>
                 )}
               </>
