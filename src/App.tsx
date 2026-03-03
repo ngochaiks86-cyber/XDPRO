@@ -1727,72 +1727,84 @@ if (selectedProjectId === id) {
         </div>
       )}
       {/* Edit Owner Payment Modal */}
-      {showEditOwnerPayment && editingOwnerPayment && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl">
-            <h2 className="text-2xl font-black text-slate-900 mb-6">Sửa thông tin ứng tiền</h2>
-            <form onSubmit={handleUpdateOwnerPayment} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Số tiền ứng (VNĐ)</label>
-                <NumericInput 
-                  required
-                  value={editingOwnerPayment.amount}
-                  onChange={(val) => setEditingOwnerPayment({...editingOwnerPayment, amount: val})}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Nội dung / Ghi chú</label>
-                <input 
-                  type="text" 
-                  required
-                  value={editingOwnerPayment.note || ''}
-                  onChange={(e) => setEditingOwnerPayment({...editingOwnerPayment, note: e.target.value})}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Ngày nhận</label>
-                <input 
-                  type="date" 
-                  required
-                  value={editingOwnerPayment.date || ''}
-                  onChange={(e) => setEditingOwnerPayment({...editingOwnerPayment, date: e.target.value})}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
-                />
-              </div>
-              <div className="flex gap-3 pt-4">
-                <button 
-                  type="button"
-                  onClick={() => setShowEditOwnerPayment(false)}
-                  className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl transition-colors"
-                >
-                  Hủy
-                </button>
-                <button 
-                  type="submit"
-                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-indigo-200 transition-all"
-                >
-                  Cập nhật
-                </button>
-              </div>
-            </form>
-          <button 
-                  type="button"
-                  onClick={() => setShowEditOwnerPayment(false)}
-                  className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl transition-colors"
-                >
-                  Hủy
-                </button>
-                <button 
-                  type="submit"
-                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-indigo-200 transition-all"
-                >
-                  Cập nhật
-                              </button>
-              </div>
-            </form>
-          </div>
+     {showEditOwnerPayment && editingOwnerPayment && (
+  <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl">
+      <h2 className="text-2xl font-black text-slate-900 mb-6">
+        Sửa thông tin ứng tiền
+      </h2>
+
+      <form onSubmit={handleUpdateOwnerPayment} className="space-y-4">
+        <div>
+          <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">
+            Số tiền ứng (VNĐ)
+          </label>
+          <NumericInput
+            required
+            value={editingOwnerPayment.amount}
+            onChange={(val) =>
+              setEditingOwnerPayment({
+                ...editingOwnerPayment,
+                amount: val,
+              })
+            }
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3"
+          />
         </div>
-      </div>
-    )}
+
+        <div>
+          <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">
+            Nội dung / Ghi chú
+          </label>
+          <input
+            type="text"
+            required
+            value={editingOwnerPayment.note || ""}
+            onChange={(e) =>
+              setEditingOwnerPayment({
+                ...editingOwnerPayment,
+                note: e.target.value,
+              })
+            }
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">
+            Ngày nhận
+          </label>
+          <input
+            type="date"
+            required
+            value={editingOwnerPayment.date || ""}
+            onChange={(e) =>
+              setEditingOwnerPayment({
+                ...editingOwnerPayment,
+                date: e.target.value,
+              })
+            }
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3"
+          />
+        </div>
+
+        <div className="flex gap-3 pt-4">
+          <button
+            type="button"
+            onClick={() => setShowEditOwnerPayment(false)}
+            className="flex-1 bg-slate-100 text-slate-600 font-bold py-3 rounded-xl"
+          >
+            Hủy
+          </button>
+
+          <button
+            type="submit"
+            className="flex-1 bg-indigo-600 text-white font-bold py-3 rounded-xl"
+          >
+            Cập nhật
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
