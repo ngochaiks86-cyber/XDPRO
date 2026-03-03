@@ -203,22 +203,30 @@ export default function App() {
     }
   };
 
-  const handleAddProject = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const res = await fetch('/api/projects', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newProject),
-      });
-      if (res.ok) {
-        setShowAddProject(false);
-        setNewProject({ name: '', budget: 0, start_date: format(new Date(), 'yyyy-MM-dd'), image_url: '' });
-              }
-    } catch (err) {
-      console.error('Failed to add project', err);
-    }
+  const handleAddProject = (e: React.FormEvent) => {
+  e.preventDefault();
+
+  const newProj: Project = {
+    id: Date.now().toString(),
+    name: newProject.name,
+    budget: newProject.budget,
+    start_date: newProject.start_date,
+    image_url: newProject.image_url || '',
+    expenses: [],
+    owner_payments: [],
   };
+
+  setProjects(prev => [...prev, newProj]);
+  setShowAddProject(false);
+
+  // reset form
+  setNewProject({
+    name: '',
+    budget: 0,
+    start_date: '',
+    image_url: ''
+  });
+};
 
   const handleEditProject = async (e: React.FormEvent) => {
     e.preventDefault();
