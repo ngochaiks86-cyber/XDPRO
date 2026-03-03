@@ -101,6 +101,22 @@ const getProjects = () => {
 const saveProjects = (projects: any[]) => {
   localStorage.setItem("projects", JSON.stringify(projects));
 };
+  const updateProjectInStorage = (updatedProject: Project) => {
+  const projects = getProjects();
+
+  const updatedProjects = projects.map(p =>
+    p.id === updatedProject.id ? updatedProject : p
+  );
+
+  saveProjects(updatedProjects);
+  setProjects(updatedProjects);
+  setSelectedProject(updatedProject);
+};
+
+const getCurrentProject = () => {
+  const projects = getProjects();
+  return projects.find(p => p.id === selectedProjectId);
+};
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -191,35 +207,42 @@ const saveProjects = (projects: any[]) => {
   };
 
   const fetchProjects = async () => {
-    try {
+  
       const data = getProjects();
       setProjects(data);
       setLoading(false);
-    } catch (err) {
-      console.error('Failed to fetch projects', err);
-    }
   };
 
-  const fetchProjectDetails = async (id: number) => {
-    try {
-      const res = await fetch(`/api/projects/${id}`);
-      const data = await res.json();
-      setSelectedProject(data);
-    } catch (err) {
-      console.error('Failed to fetch project details', err);
-    }
-  };
-
-  const handleAddProject = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
+  const fetchProjectDetails = (id: number) => {
   const projects = getProjects();
+  const project = projects.find(p => p.id === id);
+  setSelectedProject(project || null);
+};
+     const handleAddProject = (e: React.FormEvent) => {
+    e.preventDefault();
+       
+  const projects = getProjects();
+       
 const newProjectWithId = {
   ...newProject,
   id: Date.now(),
-  expenses: []   //
+  expenses: [],
+  owner_payments: [],
+  photos: []
 };
+const updatedProjects = [...projects, newProjectWithId];
 
+  saveProjects(updatedProjects);
+  setProjects(updatedProjects);
+
+  setShowAddProject(false);
+  setNewProject({
+    name: '',
+    budget: 0,
+    start_date: format(new Date(), 'yyyy-MM-dd'),
+    image_url: ''
+  });
+};
 projects.push(newProjectWithId);
       saveProjects(projects);   // 👈 THÊM DÒNG NÀY Ở ĐÂY
       setProjects(projects);   // ⚠ QUAN TRỌNG
