@@ -1,0 +1,5 @@
+{
+  "name": "Xây Dựng Pro",
+  "description": "Ứng dụng quản lý chi phí, nhân công và vật tư cho công trình xây dựng dân dụng.",
+  "requestFramePermissions": ["camera"]
+}
