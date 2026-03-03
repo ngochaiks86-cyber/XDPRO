@@ -1196,19 +1196,16 @@ if (selectedProjectId === id) {
         </div>
       </td>
     </tr>
-  ))
+   ))
 )}
-                             </tbody>
+</tbody>
 </table>
 </div>
 </div>
-    </>
-                  </div>
-                            </>
-            )}
-          </div>
-        )}
-      </main>
+</div>
+)}
+</div>
+</main>
 
       {/* Add Owner Payment Modal */}
       {showAddOwnerPayment && (
