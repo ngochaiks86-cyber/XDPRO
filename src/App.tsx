@@ -242,9 +242,6 @@ const updatedProjects = [...projects, newProjectWithId];
     start_date: format(new Date(), 'yyyy-MM-dd'),
     image_url: ''
   });
-    } catch (err) {
-      console.error('Failed to edit project', err);
-    }
   };
 
   const handleAddPhoto = async (e: React.FormEvent) => {
