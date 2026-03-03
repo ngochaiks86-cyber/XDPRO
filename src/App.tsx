@@ -216,7 +216,8 @@ const saveProjects = (projects: any[]) => {
   const projects = getProjects();
 const newProjectWithId = {
   ...newProject,
-  id: Date.now()
+  id: Date.now(),
+  expenses: []   //
 };
 
 projects.push(newProjectWithId);
