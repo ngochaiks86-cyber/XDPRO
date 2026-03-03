@@ -93,30 +93,6 @@ function NumericInput({
 }
 
 export default function App() {
-const getProjects = () => {
-  const data = localStorage.getItem("projects");
-  return data ? JSON.parse(data) : [];
-};
-
-const saveProjects = (projects: any[]) => {
-  localStorage.setItem("projects", JSON.stringify(projects));
-};
-  const updateProjectInStorage = (updatedProject: Project) => {
-  const projects = getProjects();
-
-  const updatedProjects = projects.map(p =>
-    p.id === updatedProject.id ? updatedProject : p
-  );
-
-  saveProjects(updatedProjects);
-  setProjects(updatedProjects);
-  setSelectedProject(updatedProject);
-};
-
-const getCurrentProject = () => {
-  const projects = getProjects();
-  return projects.find(p => p.id === selectedProjectId);
-};
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -207,41 +183,63 @@ const getCurrentProject = () => {
   };
 
   const fetchProjects = async () => {
-  
-      const data = getProjects();
+    try {
+      const res = await fetch('/api/projects');
+      const data = await res.json();
       setProjects(data);
       setLoading(false);
+    } catch (err) {
+      console.error('Failed to fetch projects', err);
+    }
   };
 
-  const fetchProjectDetails = (id: number) => {
-  const projects = getProjects();
-  const project = projects.find(p => p.id === id);
-  setSelectedProject(project || null);
-};
-     const handleAddProject = (e: React.FormEvent) => {
+  const fetchProjectDetails = async (id: number) => {
+    try {
+      const res = await fetch(`/api/projects/${id}`);
+      const data = await res.json();
+      setSelectedProject(data);
+    } catch (err) {
+      console.error('Failed to fetch project details', err);
+    }
+  };
+
+  const handleAddProject = async (e: React.FormEvent) => {
     e.preventDefault();
-       
-  const projects = getProjects();
-       
-const newProjectWithId = {
-  ...newProject,
-  id: Date.now(),
-  expenses: [],
-  owner_payments: [],
-  photos: []
-};
-const updatedProjects = [...projects, newProjectWithId];
+    try {
+      const res = await fetch('/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newProject),
+      });
+      if (res.ok) {
+        setShowAddProject(false);
+        setNewProject({ name: '', budget: 0, start_date: format(new Date(), 'yyyy-MM-dd'), image_url: '' });
+        fetchProjects();
+      }
+    } catch (err) {
+      console.error('Failed to add project', err);
+    }
+  };
 
-  saveProjects(updatedProjects);
-  setProjects(updatedProjects);
-
-  setShowAddProject(false);
-  setNewProject({
-    name: '',
-    budget: 0,
-    start_date: format(new Date(), 'yyyy-MM-dd'),
-    image_url: ''
-  });
+  const handleEditProject = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingProject) return;
+    try {
+      const res = await fetch(`/api/projects/${editingProject.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editingProject),
+      });
+      if (res.ok) {
+        setShowEditProject(false);
+        fetchProjects();
+        if (selectedProjectId === editingProject.id) {
+          fetchProjectDetails(editingProject.id);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to edit project', err);
+    }
   };
 
   const handleAddPhoto = async (e: React.FormEvent) => {
@@ -447,19 +445,11 @@ const updatedProjects = [...projects, newProjectWithId];
     e.stopPropagation();
     if (!confirm('Bạn có chắc chắn muốn xóa toàn bộ công trình này?')) return;
     try {
-     const projects = getProjects();
-
-const updatedProjects = projects.filter(
-  (project) => project.id !== id
-);
-
-saveProjects(updatedProjects);
-
-setProjects(updatedProjects);
-
-if (selectedProjectId === id) {
-  setSelectedProjectId(null);
-}
+      const res = await fetch(`/api/projects/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        if (selectedProjectId === id) setSelectedProjectId(null);
+        fetchProjects();
+      }
     } catch (err) {
       console.error('Failed to delete project', err);
     }
@@ -1072,21 +1062,14 @@ if (selectedProjectId === id) {
                     )}
 
                     {/* Sub-sections for Labor or Materials or Others */}
-                    {( activeTab === 'labor'
-      ? [ExpenseCategory.LABOR, ExpenseCategory.CONTRACTED_LABOR]
-      : activeTab === 'materials'
-      ? [ExpenseCategory.RAW_MATERIAL, ExpenseCategory.FINISHING_MATERIAL]
-      : [ExpenseCategory.OTHER]
-  ).map((cat) => {
-    const filteredExpenses =
-      selectedProject.expenses?.filter((e) => e.category === cat) || [];
+                    {(activeTab === 'labor' ? [ExpenseCategory.LABOR, ExpenseCategory.CONTRACTED_LABOR] : 
+                      activeTab === 'materials' ? [ExpenseCategory.RAW_MATERIAL, ExpenseCategory.FINISHING_MATERIAL] :
+                      [ExpenseCategory.OTHER]
+                    ).map((cat) => {
+                      const filteredExpenses = selectedProject.expenses?.filter(e => e.category === cat) || [];
+                      const total = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
 
-    const total = filteredExpenses.reduce(
-      (sum, e) => sum + e.amount,
-      0
-    );
-
-    return (
+                      return (
                         <div key={cat} className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
                           <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                             <div className="flex items-center gap-3">
@@ -1120,99 +1103,95 @@ if (selectedProjectId === id) {
                                 </tr>
                               </thead>
                               <tbody className="divide-y divide-slate-50">
-                    {filteredExpenses.length === 0 ? (
-  <tr>
-    <td colSpan={5} className="px-6 py-12 text-center text-slate-400 italic">
-      Chưa có chi phí nào trong hạng mục này
-    </td>
-  </tr>
-) : (
-  filteredExpenses.map((expense) => (
-    <tr key={expense.id} className="hover:bg-slate-50 transition-colors group">
-      <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
-        {expense.date}
-      </td>
-
-      <td className="px-6 py-4">
-        <div className="space-y-1">
-          <p className="text-sm text-slate-900 font-medium">
-            {expense.description}
-          </p>
-
-          {expense.payments && expense.payments.length > 0 && (
-            <div className="flex flex-wrap gap-1">
-              {expense.payments.map((p, idx) => (
-                <span
-                  key={p.id}
-                  className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded border border-slate-200 flex items-center gap-1"
-                >
-                  Ứng {idx + 1}: {formatCurrency(p.amount)}
-
-                  <button
-                    onClick={() => handleDeleteExpensePayment(p.id)}
-                    className="hover:text-red-500 ml-1 p-0.5 rounded-full hover:bg-red-50 transition-colors"
-                    title="Xóa đợt ứng"
-                  >
-                    <Plus size={10} className="rotate-45" />
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-      </td>
-
-      <td className="px-6 py-4 text-sm text-slate-600 text-center whitespace-nowrap">
-        {expense.quantity
-          ? `${expense.quantity} ${expense.unit || ""}`
-          : "-"}
-      </td>
-
-      <td className="px-6 py-4 text-sm font-bold text-slate-900 text-right whitespace-nowrap">
-        {formatCurrency(expense.amount)}
-      </td>
-
-      <td className="px-6 py-4 text-right">
-        <div className="flex items-center justify-end gap-2">
-          <button
-            onClick={() => {
-              setSelectedExpenseId(expense.id);
-              setShowAddExpensePayment(true);
-            }}
-            className="text-indigo-600 hover:bg-indigo-50 p-1.5 rounded-lg transition-colors"
-          >
-            <DollarSign size={16} />
-          </button>
-
-          <button
-            onClick={() => {
-              setEditingExpense(expense);
-              setShowEditExpense(true);
-            }}
-            className="text-slate-400 hover:text-indigo-600 transition-colors p-1 hover:bg-indigo-50 rounded-md"
-          >
-            <Pencil size={16} />
-          </button>
-
-          <button
-            onClick={() => handleDeleteExpense(expense.id)}
-            className="text-slate-400 hover:text-red-500 transition-colors p-1 hover:bg-red-50 rounded-md"
-          >
-            <Trash2 size={16} />
-          </button>
-        </div>
-      </td>
-    </tr>
-   ))
-}
-</tbody>
-</table>
-</div>
-</div>
-</div>
-)}
-</div>
-</main>
+                                {filteredExpenses.length === 0 ? (
+                                  <tr>
+                                    <td colSpan={4} className="px-6 py-12 text-center text-slate-400 italic">
+                                      Chưa có chi phí nào trong hạng mục này
+                                    </td>
+                                  </tr>
+                                ) : (
+                                  filteredExpenses.map((expense) => (
+                                    <tr key={expense.id} className="hover:bg-slate-50 transition-colors group">
+                                      <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">{expense.date}</td>
+                                      <td className="px-6 py-4">
+                                        <div className="space-y-1">
+                                          <p className="text-sm text-slate-900 font-medium">{expense.description}</p>
+                                          {expense.payments && expense.payments.length > 0 && (
+                                            <div className="flex flex-wrap gap-1">
+                                              {expense.payments.map((p, idx) => (
+                                                <span key={p.id} className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded border border-slate-200 flex items-center gap-1">
+                                                  Ứng {idx + 1}: {formatCurrency(p.amount)}
+                                                  <button 
+                                                    onClick={() => handleDeleteExpensePayment(p.id)} 
+                                                    className="hover:text-red-500 ml-1 p-0.5 rounded-full hover:bg-red-50 transition-colors"
+                                                    title="Xóa đợt ứng"
+                                                  >
+                                                    <Plus size={10} className="rotate-45" />
+                                                  </button>
+                                                </span>
+                                              ))}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </td>
+                                      <td className="px-6 py-4 text-sm text-slate-600 text-center whitespace-nowrap">
+                                        {expense.quantity ? `${expense.quantity} ${expense.unit || ''}` : '-'}
+                                      </td>
+                                      <td className="px-6 py-4 text-sm font-bold text-slate-900 text-right whitespace-nowrap">
+                                        <div className="flex flex-col items-end">
+                                          <span>{formatCurrency(expense.amount)}</span>
+                                          {expense.payments && expense.payments.length > 0 && (
+                                            <span className="text-[10px] text-slate-400">Đã ứng: {formatCurrency(expense.payments.reduce((s, p) => s + p.amount, 0))}</span>
+                                          )}
+                                        </div>
+                                      </td>
+                                      <td className="px-6 py-4 text-right">
+                                        <div className="flex items-center justify-end gap-2">
+                                          <button 
+                                            onClick={() => {
+                                              setSelectedExpenseId(expense.id);
+                                              setShowAddExpensePayment(true);
+                                            }}
+                                            className="text-indigo-600 hover:bg-indigo-50 p-1.5 rounded-lg transition-colors"
+                                            title="Ghi nhận ứng tiền"
+                                          >
+                                            <DollarSign size={16} />
+                                          </button>
+                                          <button 
+                                            onClick={() => {
+                                              setEditingExpense(expense);
+                                              setShowEditExpense(true);
+                                            }}
+                                            className="text-slate-400 hover:text-indigo-600 transition-colors p-1 hover:bg-indigo-50 rounded-md"
+                                            title="Sửa chi phí"
+                                          >
+                                            <Pencil size={16} />
+                                          </button>
+                                          <button 
+                                            onClick={() => handleDeleteExpense(expense.id)}
+                                            className="text-slate-400 hover:text-red-500 transition-colors p-1 hover:bg-red-50 rounded-md"
+                                            title="Xóa chi phí"
+                                          >
+                                            <Trash2 size={16} />
+                                          </button>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  ))
+                                )}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
+      </main>
 
       {/* Add Owner Payment Modal */}
       {showAddOwnerPayment && (
@@ -1221,21 +1200,14 @@ if (selectedProjectId === id) {
             <h2 className="text-2xl font-black text-slate-900 mb-6">Ghi nhận chủ đầu tư ứng</h2>
             <form onSubmit={handleAddOwnerPayment} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">
-  Số tiền ứng (VNĐ)
-</label>
-
-<NumericInput
-  required
-  value={editingOwnerPayment?.amount}
-  onChange={(val) =>
-    setEditingOwnerPayment({
-      ...editingOwnerPayment!,
-      amount: val,
-    })
-  }
-  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-/>
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Số tiền ứng (VNĐ)</label>
+                <NumericInput 
+                  required
+                  value={newOwnerPayment.amount}
+                  onChange={(val) => setNewOwnerPayment({...newOwnerPayment, amount: val})}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                  placeholder="0"
+                />
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Nội dung / Ghi chú</label>
@@ -1258,22 +1230,21 @@ if (selectedProjectId === id) {
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
                 />
               </div>
-             <div className="flex gap-3 pt-4">
-  <button 
-    type="button"
-    onClick={() => setShowAddOwnerPayment(false)}
-    className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl transition-colors"
-  >
-    Hủy
-  </button>
-
-  <button 
-    type="submit"
-    className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-indigo-200 transition-all"
-  >
-    Lưu thông tin
-  </button>
-</div>
+              <div className="flex gap-3 pt-4">
+                <button 
+                  type="button"
+                  onClick={() => setShowAddOwnerPayment(false)}
+                  className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl transition-colors"
+                >
+                  Hủy
+                </button>
+                <button 
+                  type="submit"
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-emerald-200 transition-all"
+                >
+                  Lưu thông tin
+                </button>
+              </div>
             </form>
           </div>
         </div>
@@ -1682,15 +1653,13 @@ if (selectedProjectId === id) {
                 </div>
               </div>
               <div>
-               <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">
-    Số tiền (VND)
-  </label>
-  <NumericInput 
-    required
-    value={editingExpense.amount}
-    onChange={(val) => setEditingExpense({...editingExpense, amount: val})}
-    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-  />
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Số tiền (VND)</label>
+                <NumericInput 
+                  required
+                  value={editingExpense.amount}
+                  onChange={(val) => setEditingExpense({...editingExpense, amount: val})}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                />
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Ngày chi</label>
@@ -1712,84 +1681,59 @@ if (selectedProjectId === id) {
         </div>
       )}
       {/* Edit Owner Payment Modal */}
-     {showEditOwnerPayment && editingOwnerPayment && (
-  <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl">
-      <h2 className="text-2xl font-black text-slate-900 mb-6">
-        Sửa thông tin ứng tiền
-      </h2>
-
-      <form onSubmit={handleUpdateOwnerPayment} className="space-y-4">
-        <div>
-          <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">
-            Số tiền ứng (VNĐ)
-          </label>
-          <NumericInput
-            required
-            value={editingOwnerPayment.amount}
-            onChange={(val) =>
-              setEditingOwnerPayment({
-                ...editingOwnerPayment,
-                amount: val,
-              })
-            }
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3"
-          />
+      {showEditOwnerPayment && editingOwnerPayment && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl">
+            <h2 className="text-2xl font-black text-slate-900 mb-6">Sửa thông tin ứng tiền</h2>
+            <form onSubmit={handleUpdateOwnerPayment} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Số tiền ứng (VNĐ)</label>
+                <NumericInput 
+                  required
+                  value={editingOwnerPayment.amount}
+                  onChange={(val) => setEditingOwnerPayment({...editingOwnerPayment, amount: val})}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Nội dung / Ghi chú</label>
+                <input 
+                  type="text" 
+                  required
+                  value={editingOwnerPayment.note || ''}
+                  onChange={(e) => setEditingOwnerPayment({...editingOwnerPayment, note: e.target.value})}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Ngày nhận</label>
+                <input 
+                  type="date" 
+                  required
+                  value={editingOwnerPayment.date || ''}
+                  onChange={(e) => setEditingOwnerPayment({...editingOwnerPayment, date: e.target.value})}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button 
+                  type="button"
+                  onClick={() => setShowEditOwnerPayment(false)}
+                  className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl transition-colors"
+                >
+                  Hủy
+                </button>
+                <button 
+                  type="submit"
+                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-indigo-200 transition-all"
+                >
+                  Cập nhật
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-
-        <div>
-          <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">
-            Nội dung / Ghi chú
-          </label>
-          <input
-            type="text"
-            required
-            value={editingOwnerPayment.note || ""}
-            onChange={(e) =>
-              setEditingOwnerPayment({
-                ...editingOwnerPayment,
-                note: e.target.value,
-              })
-            }
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">
-            Ngày nhận
-          </label>
-          <input
-            type="date"
-            required
-            value={editingOwnerPayment.date || ""}
-            onChange={(e) =>
-              setEditingOwnerPayment({
-                ...editingOwnerPayment,
-                date: e.target.value,
-              })
-            }
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3"
-          />
-        </div>
-
-        <div className="flex gap-3 pt-4">
-          <button
-            type="button"
-            onClick={() => setShowEditOwnerPayment(false)}
-            className="flex-1 bg-slate-100 text-slate-600 font-bold py-3 rounded-xl"
-          >
-            Hủy
-          </button>
-
-          <button
-            type="submit"
-            className="flex-1 bg-indigo-600 text-white font-bold py-3 rounded-xl"
-          >
-            Cập nhật
-          </button>
-        </div>
-      </form>
+      )}
     </div>
-  </div>
-)}
+  );
+}
