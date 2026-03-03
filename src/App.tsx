@@ -129,11 +129,7 @@ export default function App() {
   const [newOwnerPayment, setNewOwnerPayment] = useState({ amount: 0, note: '', date: format(new Date(), 'yyyy-MM-dd') });
   const [newPhoto, setNewPhoto] = useState({ image_url: '', description: '', date: format(new Date(), 'yyyy-MM-dd') });
 
-  useEffect(() => {
-    fetchProjects();
-  }, []);
-
-  useEffect(() => {
+    useEffect(() => {
     if (selectedProjectId) {
       fetchProjectDetails(selectedProjectId);
       setActiveTab('overview');
