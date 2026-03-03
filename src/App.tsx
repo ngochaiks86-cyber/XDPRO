@@ -129,15 +129,15 @@ export default function App() {
   const [newOwnerPayment, setNewOwnerPayment] = useState({ amount: 0, note: '', date: format(new Date(), 'yyyy-MM-dd') });
   const [newPhoto, setNewPhoto] = useState({ image_url: '', description: '', date: format(new Date(), 'yyyy-MM-dd') });
 
-    useEffect(() => {
-    if (selectedProjectId) {
-      fetchProjectDetails(selectedProjectId);
-      setActiveTab('overview');
-    } else {
-      setSelectedProject(null);
-    }
-  }, [selectedProjectId]);
-
+   useEffect(() => {
+  if (selectedProjectId) {
+    const found = projects.find(p => p.id === selectedProjectId) || null;
+    setSelectedProject(found);
+    setActiveTab('overview');
+  } else {
+    setSelectedProject(null);
+  }
+}, [selectedProjectId, projects]);
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
