@@ -1204,8 +1204,7 @@ if (selectedProjectId === id) {
                         </div>
                                       ))}
                   </div>
-                )}
-              </>
+                            </>
             )}
           </div>
         )}
