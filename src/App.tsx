@@ -247,24 +247,43 @@ export default function App() {
     }
   };
 
-  const handleAddPhoto = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedProjectId) return;
-    try {
-      const res = await fetch(`/api/projects/${selectedProjectId}/photos`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newPhoto),
-      });
-      if (res.ok) {
-        setShowAddPhoto(false);
-        setNewPhoto({ image_url: '', description: '', date: format(new Date(), 'yyyy-MM-dd') });
-        fetchProjectDetails(selectedProjectId);
-      }
-    } catch (err) {
-      console.error('Failed to add photo', err);
-    }
+ const handleAddPhoto = (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!selectedProjectId || !selectedFile) return;
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    const base64 = reader.result as string;
+
+    const newPhoto = {
+      id: Date.now().toString(),
+      image: base64,
+      description: newPhotoData.description,
+      date: newPhotoData.date,
+    };
+
+    setProjects(prev =>
+      prev.map(project =>
+        project.id === selectedProjectId
+          ? {
+              ...project,
+              photos: [...(project.photos || []), newPhoto],
+            }
+          : project
+      )
+    );
+
+    setShowAddPhoto(false);
+    setSelectedFile(null);
+    setNewPhotoData({
+      description: '',
+      date: format(new Date(), 'yyyy-MM-dd'),
+    });
   };
+
+  reader.readAsDataURL(selectedFile);
+};
 
   const handleDeletePhoto = async (id: number) => {
     if (!confirm('Bạn có chắc chắn muốn xóa ảnh này?')) return;
