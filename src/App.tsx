@@ -1204,7 +1204,7 @@ if (selectedProjectId === id) {
       </td>
     </tr>
    ))
-)}
+}
 </tbody>
 </table>
 </div>
