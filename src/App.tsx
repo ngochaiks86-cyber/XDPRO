@@ -293,31 +293,39 @@ export default function App() {
     }
   };
 
-  const handleAddExpense = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedProjectId) return;
-    try {
-      const res = await fetch('/api/expenses', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...newExpense, project_id: selectedProjectId }),
-      });
-      if (res.ok) {
-        setShowAddExpense(false);
-        setNewExpense({ 
-          category: ExpenseCategory.LABOR, 
-          description: '', 
-          amount: 0, 
-          quantity: 0,
-          unit: '',
-          date: format(new Date(), 'yyyy-MM-dd') 
-        });
-        fetchProjectDetails(selectedProjectId);
-      }
-    } catch (err) {
-      console.error('Failed to add expense', err);
-    }
+ const handleAddExpense = (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!selectedProjectId) return;
+
+  const newExp: Expense = {
+    id: Date.now().toString(),
+    category: newExpense.category,
+    description: newExpense.description,
+    amount: newExpense.amount,
+    quantity: newExpense.quantity,
+    unit: newExpense.unit,
+    date: newExpense.date,
   };
+
+  setProjects(prev =>
+    prev.map(p =>
+      p.id === selectedProjectId
+        ? { ...p, expenses: [...p.expenses, newExp] }
+        : p
+    )
+  );
+
+  setShowAddExpense(false);
+
+  setNewExpense({
+    category: ExpenseCategory.LABOR,
+    description: '',
+    amount: 0,
+    quantity: 0,
+    unit: '',
+    date: format(new Date(), 'yyyy-MM-dd')
+  });
+};
 
   const handleUpdateExpense = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -338,115 +346,161 @@ export default function App() {
     }
   };
 
-  const handleAddExpensePayment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedExpenseId || !selectedProjectId) return;
-    try {
-      const res = await fetch(`/api/expenses/${selectedExpenseId}/payments`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newExpensePayment),
-      });
-      if (res.ok) {
-        setShowAddExpensePayment(false);
-        setNewExpensePayment({ amount: 0, note: '', date: format(new Date(), 'yyyy-MM-dd') });
-        fetchProjectDetails(selectedProjectId);
-      }
-    } catch (err) {
-      console.error('Failed to add expense payment', err);
-    }
+  const handleAddExpensePayment = (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!selectedExpenseId || !selectedProjectId) return;
+
+  const newPayment = {
+    id: Date.now().toString(),
+    amount: newExpensePayment.amount,
+    note: newExpensePayment.note,
+    date: newExpensePayment.date,
   };
 
-  const handleDeleteExpensePayment = async (id: number) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa đợt ứng này?')) return;
-    try {
-      const res = await fetch(`/api/expense-payments/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        if (selectedProjectId) fetchProjectDetails(selectedProjectId);
-      } else {
-        const errorData = await res.json();
-        alert('Lỗi: ' + (errorData.error || 'Không thể xóa đợt ứng'));
-      }
-    } catch (err) {
-      console.error('Failed to delete expense payment', err);
-      alert('Lỗi kết nối khi xóa đợt ứng');
-    }
+  setProjects(prev =>
+    prev.map(project =>
+      project.id === selectedProjectId
+        ? {
+            ...project,
+            expenses: project.expenses.map(exp =>
+              exp.id === selectedExpenseId
+                ? {
+                    ...exp,
+                    payments: [...(exp.payments || []), newPayment],
+                  }
+                : exp
+            ),
+          }
+        : project
+    )
+  );
+
+  setShowAddExpensePayment(false);
+  setNewExpensePayment({
+    amount: 0,
+    note: '',
+    date: format(new Date(), 'yyyy-MM-dd'),
+  });
+};
+
+  const handleDeleteExpensePayment = (paymentId: string) => {
+  if (!confirm('Bạn có chắc chắn muốn xóa đợt ứng này?')) return;
+  if (!selectedProjectId || !selectedExpenseId) return;
+
+  setProjects(prev =>
+    prev.map(project =>
+      project.id === selectedProjectId
+        ? {
+            ...project,
+            expenses: project.expenses.map(exp =>
+              exp.id === selectedExpenseId
+                ? {
+                    ...exp,
+                    payments: (exp.payments || []).filter(
+                      pay => pay.id !== paymentId
+                    ),
+                  }
+                : exp
+            ),
+          }
+        : project
+    )
+  );
+};
+
+  const handleAddOwnerPayment = (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!selectedProjectId) return;
+
+  const newPayment: OwnerPayment = {
+    id: Date.now().toString(),
+    amount: newOwnerPayment.amount,
+    note: newOwnerPayment.note,
+    date: newOwnerPayment.date,
   };
 
-  const handleAddOwnerPayment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedProjectId) return;
-    try {
-      const res = await fetch(`/api/projects/${selectedProjectId}/owner-payments`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newOwnerPayment),
-      });
-      if (res.ok) {
-        setShowAddOwnerPayment(false);
-        setNewOwnerPayment({ amount: 0, note: '', date: format(new Date(), 'yyyy-MM-dd') });
-        fetchProjectDetails(selectedProjectId);
-      }
-    } catch (err) {
-      console.error('Failed to add owner payment', err);
-    }
-  };
+  setProjects(prev =>
+    prev.map(project =>
+      project.id === selectedProjectId
+        ? {
+            ...project,
+            owner_payments: [
+              ...(project.owner_payments || []),
+              newPayment,
+            ],
+          }
+        : project
+    )
+  );
 
-  const handleUpdateOwnerPayment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingOwnerPayment || !selectedProjectId) return;
-    try {
-      const res = await fetch(`/api/owner-payments/${editingOwnerPayment.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editingOwnerPayment),
-      });
-      if (res.ok) {
-        setShowEditOwnerPayment(false);
-        setEditingOwnerPayment(null);
-        fetchProjectDetails(selectedProjectId);
-      }
-    } catch (err) {
-      console.error('Failed to update owner payment', err);
-    }
-  };
+  setShowAddOwnerPayment(false);
+  setNewOwnerPayment({
+    amount: 0,
+    note: '',
+    date: format(new Date(), 'yyyy-MM-dd'),
+  });
+};
 
-  const handleDeleteOwnerPayment = async (id: number) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa đợt ứng này?')) return;
-    try {
-      const res = await fetch(`/api/owner-payments/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        if (selectedProjectId) fetchProjectDetails(selectedProjectId);
-      } else {
-        const errorData = await res.json();
-        alert('Lỗi: ' + (errorData.error || 'Không thể xóa đợt ứng'));
-      }
-    } catch (err) {
-      console.error('Failed to delete owner payment', err);
-      alert('Lỗi kết nối khi xóa đợt ứng');
-    }
-  };
+  const handleUpdateOwnerPayment = (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!editingOwnerPayment || !selectedProjectId) return;
 
-  const handleDeleteExpense = async (id: number) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa chi phí này?')) return;
-    try {
-      console.log(`Deleting expense ${id}`);
-      const res = await fetch(`/api/expenses/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        if (selectedProjectId) {
-          fetchProjectDetails(selectedProjectId);
-        }
-      } else {
-        const errorData = await res.json();
-        alert('Lỗi: ' + (errorData.error || 'Không thể xóa chi phí'));
-      }
-    } catch (err) {
-      console.error('Failed to delete expense', err);
-      alert('Lỗi kết nối khi xóa chi phí');
-    }
-  };
+  setProjects(prev =>
+    prev.map(project =>
+      project.id === selectedProjectId
+        ? {
+            ...project,
+            owner_payments: project.owner_payments.map(payment =>
+              payment.id === editingOwnerPayment.id
+                ? editingOwnerPayment
+                : payment
+            ),
+          }
+        : project
+    )
+  );
 
- const handleDeleteProject = (id: number, e: React.MouseEvent) => {
+  setShowEditOwnerPayment(false);
+  setEditingOwnerPayment(null);
+};
+
+  const handleDeleteOwnerPayment = (paymentId: string) => {
+  if (!confirm('Bạn có chắc chắn muốn xóa đợt ứng này?')) return;
+  if (!selectedProjectId) return;
+
+  setProjects(prev =>
+    prev.map(project =>
+      project.id === selectedProjectId
+        ? {
+            ...project,
+            owner_payments: (project.owner_payments || []).filter(
+              payment => payment.id !== paymentId
+            ),
+          }
+        : project
+    )
+  );
+};
+
+  const handleDeleteExpense = (expenseId: string) => {
+  if (!confirm('Bạn có chắc chắn muốn xóa chi phí này?')) return;
+  if (!selectedProjectId) return;
+
+  setProjects(prev =>
+    prev.map(project =>
+      project.id === selectedProjectId
+        ? {
+            ...project,
+            expenses: project.expenses.filter(
+              exp => exp.id !== expenseId
+            ),
+          }
+        : project
+    )
+  );
+};
+
+ const handleDeleteProject = (id: string, e: React.MouseEvent) => {
   e.stopPropagation();
 
   if (!confirm('Bạn có chắc chắn muốn xóa toàn bộ công trình này?')) return;
