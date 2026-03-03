@@ -216,11 +216,16 @@ const saveProjects = (projects: any[]) => {
   const projects = getProjects();
 projects.push(newProject);
 saveProjects(projects);
-      if (res.ok) {
-        setShowAddProject(false);
-        setNewProject({ name: '', budget: 0, start_date: format(new Date(), 'yyyy-MM-dd'), image_url: '' });
-        fetchProjects();
-      }
+      setProjects(projects);   // ⚠ QUAN TRỌNG
+
+setShowAddProject(false);
+
+setNewProject({
+  name: "",
+  budget: 0,
+  start_date: format(new Date(), "yyyy-MM-dd"),
+  image_url: ""
+});
     } catch (err) {
       console.error('Failed to add project', err);
     }
