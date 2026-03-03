@@ -255,9 +255,6 @@ setNewProject({
   start_date: format(new Date(), "yyyy-MM-dd"),
   image_url: ""
 });
-    } catch (err) {
-      console.error('Failed to add project', err);
-    }
   };
 
   const handleEditProject = async (e: React.FormEvent) => {
