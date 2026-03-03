@@ -93,6 +93,14 @@ function NumericInput({
 }
 
 export default function App() {
+const getProjects = () => {
+  const data = localStorage.getItem("projects");
+  return data ? JSON.parse(data) : [];
+};
+
+const saveProjects = (projects: any[]) => {
+  localStorage.setItem("projects", JSON.stringify(projects));
+};
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -184,8 +192,7 @@ export default function App() {
 
   const fetchProjects = async () => {
     try {
-      const res = await fetch('/api/projects');
-      const data = await res.json();
+      const data = getProjects();
       setProjects(data);
       setLoading(false);
     } catch (err) {
@@ -206,11 +213,9 @@ export default function App() {
   const handleAddProject = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch('/api/projects', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newProject),
-      });
+  const projects = getProjects();
+projects.push(newProject);
+saveProjects(projects);
       if (res.ok) {
         setShowAddProject(false);
         setNewProject({ name: '', budget: 0, start_date: format(new Date(), 'yyyy-MM-dd'), image_url: '' });
