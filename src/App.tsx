@@ -1777,7 +1777,6 @@ if (selectedProjectId === id) {
             </form>
           </div>
         </div>
-      )}
     </div>
   );
 }
