@@ -1072,14 +1072,21 @@ if (selectedProjectId === id) {
                     )}
 
                     {/* Sub-sections for Labor or Materials or Others */}
-                    {(activeTab === 'labor' ? [ExpenseCategory.LABOR, ExpenseCategory.CONTRACTED_LABOR] : 
-                      activeTab === 'materials' ? [ExpenseCategory.RAW_MATERIAL, ExpenseCategory.FINISHING_MATERIAL] :
-                      [ExpenseCategory.OTHER]
-                    ).map((cat) => {
-                      const filteredExpenses = selectedProject.expenses?.filter(e => e.category === cat) || [];
-                      const total = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
+                    {( activeTab === 'labor'
+      ? [ExpenseCategory.LABOR, ExpenseCategory.CONTRACTED_LABOR]
+      : activeTab === 'materials'
+      ? [ExpenseCategory.RAW_MATERIAL, ExpenseCategory.FINISHING_MATERIAL]
+      : [ExpenseCategory.OTHER]
+  ).map((cat) => {
+    const filteredExpenses =
+      selectedProject.expenses?.filter((e) => e.category === cat) || [];
 
-                      return (
+    const total = filteredExpenses.reduce(
+      (sum, e) => sum + e.amount,
+      0
+    );
+
+    return (
                         <div key={cat} className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
                           <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                             <div className="flex items-center gap-3">
