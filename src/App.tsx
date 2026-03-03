@@ -447,18 +447,18 @@ export default function App() {
     }
   };
 
-  const handleDeleteProject = async (id: number, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!confirm('Bạn có chắc chắn muốn xóa toàn bộ công trình này?')) return;
-    try {
-      const res = await fetch(`/api/projects/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        if (selectedProjectId === id) setSelectedProjectId(null);
-              }
-    } catch (err) {
-      console.error('Failed to delete project', err);
-    }
-  };
+ const handleDeleteProject = (id: number, e: React.MouseEvent) => {
+  e.stopPropagation();
+
+  if (!confirm('Bạn có chắc chắn muốn xóa toàn bộ công trình này?')) return;
+
+  setProjects(prev => prev.filter(p => p.id !== id));
+
+  if (selectedProjectId === id) {
+    setSelectedProjectId(null);
+    setSelectedProject(null);
+  }
+};
 
   const stats = useMemo(() => {
     if (!selectedProject || !selectedProject.expenses) return null;
