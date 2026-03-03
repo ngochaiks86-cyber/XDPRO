@@ -219,7 +219,6 @@ export default function App() {
   setProjects(prev => [...prev, newProj]);
   setShowAddProject(false);
 
-  // reset form
   setNewProject({
     name: '',
     budget: 0,
