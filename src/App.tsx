@@ -94,6 +94,9 @@ function NumericInput({
 
 export default function App() {
   const [projects, setProjects] = useState<Project[]>([]);
+  useEffect(() => {
+  localStorage.setItem('projects', JSON.stringify(projects));
+}, [projects]);
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
@@ -182,16 +185,17 @@ export default function App() {
     }
   };
 
-  const fetchProjects = async () => {
-    try {
-      const res = await fetch('/api/projects');
-      const data = await res.json();
-      setProjects(data);
-      setLoading(false);
-    } catch (err) {
-      console.error('Failed to fetch projects', err);
-    }
-  };
+ useEffect(() => {
+  const saved = localStorage.getItem('projects');
+
+  if (saved) {
+    setProjects(JSON.parse(saved));
+  } else {
+    setProjects([]);
+  }
+
+  setLoading(false);
+}, []);
 
   const fetchProjectDetails = async (id: number) => {
     try {
