@@ -95,8 +95,20 @@ function NumericInput({
 export default function App() {
   const [projects, setProjects] = useState<Project[]>([]);
   useEffect(() => {
-  localStorage.setItem('projects', JSON.stringify(projects));
-}, [projects]);
+
+  if (window.AndroidStorage) {
+
+    const json = JSON.stringify(projects)
+
+    window.AndroidStorage.saveData(json)
+
+  } else {
+
+    localStorage.setItem('projects', JSON.stringify(projects))
+
+  }
+
+}, [projects])
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
