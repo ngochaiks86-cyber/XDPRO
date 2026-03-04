@@ -111,6 +111,28 @@ export default function App() {
 }, [projects])
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  // LOAD DATA KHI MỞ APP
+  useEffect(() => {
+
+    if (window.AndroidStorage) {
+
+      const data = window.AndroidStorage.loadData()
+
+      if (data) {
+        setProjects(JSON.parse(data))
+      }
+
+    } else {
+
+      const data = localStorage.getItem('projects')
+
+      if (data) {
+        setProjects(JSON.parse(data))
+      }
+
+    }
+
+  }, [])
   const [loading, setLoading] = useState(true);
   const [showAddProject, setShowAddProject] = useState(false);
   const [showEditProject, setShowEditProject] = useState(false);
